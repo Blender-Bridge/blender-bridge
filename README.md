@@ -39,7 +39,7 @@ Blender Bridge connects your AI to your active 3D workflow:
 Web chats connect through the browser extension. AI agents connect through the MCP server. Both use the bridge managed by the desktop app to work with your active Blender scene.
 
 ```mermaid
-%%{init: {"theme":"base","themeVariables":{"fontFamily":"Arial, sans-serif","fontSize":"16px","lineColor":"#1589ff","textColor":"#ffffff","edgeLabelBackground":"#00030d"},"flowchart":{"curve":"linear","nodeSpacing":32,"rankSpacing":36}}}%%
+%%{init: {"theme":"base","themeVariables":{"fontFamily":"Arial, sans-serif","fontSize":"16px","lineColor":"#1589ff","textColor":"#ffffff","edgeLabelBackground":"#00030d"},"flowchart":{"htmlLabels":false,"curve":"linear","nodeSpacing":32,"rankSpacing":36}}}%%
 flowchart TB
     chat["AI web chats"] <--> extension["Browser extension"]
     agent["AI agents / MCP clients"] <--> mcp["MCP server"]
