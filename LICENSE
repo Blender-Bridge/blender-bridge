@@ -1,0 +1,45 @@
+Blender Bridge — Proprietary Software Licence
+Copyright (c) 2026 Blender Bridge. All rights reserved.
+
+This repository is a public description of a closed-source product. It contains
+no source code of Blender Bridge, and nothing in it grants a licence to the
+software itself.
+
+THE DESCRIPTION AND ASSETS IN THIS REPOSITORY
+
+The text, images and other material in this repository are published so that
+people can read about the product and link to it. They may be quoted with
+attribution. They may not be republished as your own, used to present another
+product, or used in a way that suggests affiliation with or endorsement by
+Blender Bridge.
+
+THE SOFTWARE
+
+Blender Bridge itself — the desktop application, the Blender add-on, the browser
+extension, the MCP server and the server components — is licensed separately to
+each user under the terms published at:
+
+  https://blenderbridge.com/terms          (terms of use)
+  https://blenderbridge.com/terms-of-sale  (subscription terms)
+
+Installers attached to the releases in this repository are distributed for
+installation and use under those terms. They may not be redistributed,
+repackaged, modified, reverse-engineered, decompiled or disassembled, except to
+the extent that such acts cannot lawfully be prohibited.
+
+NO WARRANTY
+
+The material in this repository is provided "as is", without warranty of any
+kind, express or implied. Nothing here limits any warranty, guarantee or
+statutory right granted to a purchaser of the software under the terms above or
+under the law that applies to them.
+
+TRADEMARKS
+
+Blender is a registered trademark of the Blender Foundation. Blender Bridge is
+an independent product and is not affiliated with, endorsed by, or sponsored by
+the Blender Foundation. This licence grants no rights in any trademark.
+
+CONTACT
+
+support@blenderbridge.com
