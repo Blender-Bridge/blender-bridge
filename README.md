@@ -42,7 +42,7 @@ Web chats connect through the browser extension. AI agents connect through the M
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"Arial, sans-serif","fontSize":"16px","lineColor":"#1589ff","textColor":"#ffffff","edgeLabelBackground":"#00030d"},"flowchart":{"curve":"linear","nodeSpacing":32,"rankSpacing":36}}}%%
 flowchart TB
     chat["AI web chats"] <--> extension["Browser extension"]
-    agent["AI agents / MCP clients"] <-->|MCP / stdio| mcp["MCP server"]
+    agent["AI agents / MCP clients"] <--> mcp["MCP server"]
     extension <--> bridge["Desktop app<br/>HTTP Bridge"]
     mcp <--> bridge
     bridge <--> blender["Blender<br/>Blender Bridge add-on"]
