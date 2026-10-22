@@ -1,261 +1,248 @@
 <div align="center">
-
-<img src="assets/logo.png" alt="Blender Bridge Logo" width="96" height="96">
+<img src="assets/logo.png" alt="Blender Bridge" width="88" height="88">
 
 # Blender Bridge
 
-**Connect any AI assistant, agent environment, or autonomous coding assistant directly to your live Blender scene.**
+**Connect AI chats and coding agents to a real, editable Blender scene.**
 
-Real-time bidirectional bridge: AI writes native Blender Python → executes in your active viewport → receives visual screenshot feedback → iterates autonomously.
+Model, build node systems, light, animate, render and export through Blender's Python API. Inspect the scene and viewport, refine the work in conversation, and keep the objects, materials and animation in a regular Blender project.
 
-<br>
+[**Website**](https://blenderbridge.com/) · [**Documentation**](https://blenderbridge.com/#documentation) · [**Download for Windows**](https://github.com/Blender-Bridge/blender-bridge/releases/latest/download/Blender_Bridge_Installer.exe) · [**Chrome Web Store**](https://chromewebstore.google.com/detail/blender-bridge/lgdjpajmggpkjcdogglbeipbkckdpoki) · [**Releases**](https://github.com/Blender-Bridge/blender-bridge/releases)
 
-[**Official Website**](https://blenderbridge.com) &nbsp;•&nbsp;
-[**Download**](https://blenderbridge.com/#download) &nbsp;•&nbsp;
-[**Chrome Extension**](https://chromewebstore.google.com/detail/blender-bridge/lgdjpajmggpkjcdogglbeipbkckdpoki) &nbsp;•&nbsp;
-[**Support**](mailto:support@blenderbridge.com)
-
-<br>
-
-
+Windows 10/11 x64 · Blender 4.2+ · Your own AI account or local model
 </div>
 
----
+Blender Bridge combines a Windows Desktop app, an extension inside Blender, MCP tools and a browser extension. It supplies the connection, tools and execution environment. Your chosen AI plans the task and writes Blender Python; Blender performs the work on the receiving computer. You can start with an existing project, create a new scene, or work in an explicitly shared Blender computer through your own AI.
 
-## What is Blender Bridge?
+This is the product's documentation and release repository. It hosts Windows downloads and product documentation. **For installation, use `Blender_Bridge_Installer.exe` from Releases; cloning this repository does not install Blender Bridge.** A seven-day trial is available without a card; continued access uses a [Blender Bridge subscription](https://blenderbridge.com/#pricing). AI access is separate.
 
-Blender Bridge establishes a persistent, high-speed connection between any artificial intelligence and your active Blender workspace.
+[Capabilities](#capabilities) · [Connections](#connections) · [Architecture](#architecture) · [MCP interface](#mcp-interface) · [Files and rendering](#files) · [History](#history) · [Setup](#setup) · [Compatibility](#compatibility) · [Troubleshooting](#troubleshooting)
 
-Blender Bridge connects your AI to your active 3D workflow:
+<a id="capabilities"></a>
+## What you can do in Blender
 
-- **Native Python Execution:** The AI works directly through Blender's official Python API (`bpy`). It constructs parametric geometry, procedural shader networks, lighting rigs, modifier stacks, physics simulations, and keyframe animations directly in your `.blend` file.
-- **Closed Visual Feedback Loop:** After executing changes, Blender Bridge captures high-resolution viewport screenshots and returns them directly to the AI. Your model can inspect the scene, identify errors, refine materials, adjust composition, and iterate toward your intended result.
-- **Native Scene Undo:** Revert the last supported scene operation through Blender’s native undo history.
+The AI works with Blender data and operations in the actual scene. Objects, collections, meshes, node graphs, cameras and keyframes remain available for further work in Blender. You can continue by hand and return to AI-assisted editing in the same project.
 
----
+| Area | Work you can request | What remains editable |
+|---|---|---|
+| **Modeling and scene layout** | Build props, products, interiors and level blockouts; use meshes, curves, text, modifiers, booleans and subdivision; adjust dimensions, transforms and collections. | Blender objects, geometry, modifiers and scene structure. |
+| **Geometry Nodes** | Build procedural fences, buildings, scattering, arrays or node-based effects; expose the controls that matter, such as spacing, density or floor count. | The node graph and parameters on the modifier. |
+| **Materials, textures and UVs** | Build Principled BSDF and shader graphs, procedural materials, UV layouts and texture baking. Search free asset libraries when useful. | Material nodes, UVs and the associated texture files. |
+| **Lighting and cameras** | Set studio or natural lighting, HDRIs, camera position, focal length, depth of field, framing and color settings. | Lights, worlds, cameras and render settings. |
+| **Animation, rigging and simulation** | Create keyframes, curves, camera moves, armatures, constraints and drivers; configure rigid bodies, cloth, fluids and other Blender simulations. | Animation data, rigs and simulation settings; baked caches are separate files. |
+| **Rendering and compositing** | Produce preview or final images, transparent backgrounds, animation and video; use Cycles, EEVEE, Workbench and compositing nodes. Run long renders in a separate Blender process. | The scene, render setup and requested output files. |
+| **Photo-reference work** | Put a PNG/JPEG reference behind the scene camera; build the scene with the AI, render it and compare reference and render side by side. | The camera reference and the modeled scene; modeling is performed by your AI. |
+| **Import, export and automation** | Prepare assets for game engines, websites, AR or printing; import other Blender-supported formats; batch operations or build custom scene tools through Python. | The source project and the exported files. |
 
-## Architecture & The Bidirectional Loop
+For example, a game-asset workflow can combine modeling, UVs and materials, a viewport check, revisions, then an FBX or GLB export. A product scene can keep the same model and change cameras, lighting and materials for a series of images or an animation. A printing workflow can start from dimensions and finish with an STL checked in a slicer.
 
-Web chats connect through the browser extension. AI agents connect through the MCP server. Both use the bridge managed by the desktop app to work with your active Blender scene.
+The result depends on the AI's coding, image understanding and judgment, the brief and the available hardware. Blender Bridge provides access to Blender's Python API and supporting tools; it does not supply an AI model or a separate neural text-to-mesh engine.
+
+[Capabilities guide](https://blenderbridge.com/#documentation-what-ai-can-do-in-blender) · [Geometry Nodes](https://blenderbridge.com/#documentation-geometry-nodes) · [Materials and assets](https://blenderbridge.com/#documentation-materials) · [Photo references](https://blenderbridge.com/#documentation-scene-from-photo)
+
+<a id="connections"></a>
+## Choose the connection for your AI
+
+MCP, the Model Context Protocol, lets an AI host discover and call tools. Blender Bridge offers an installed MCP connection, a hosted HTTPS MCP endpoint, and a browser extension. They reach the same execution environment through different routes.
+
+| Where the AI runs | Connection | Where Blender runs |
+|---|---|---|
+| **Desktop and IDE clients supporting MCP, including Claude Code, Codex, Cursor and VS Code** | Installed Blender Bridge MCP on Windows, using `stdio` between the host and the MCP process. Its runtime is included. | This Windows computer, or a computer belonging to you or a collaborator selected through Remote mode. |
+| **ChatGPT, Claude and hosts with custom HTTPS MCP connections** | `https://mcp.blenderbridge.com/mcp` with OAuth sign-in. Custom connections must be available in the host/account. | The selected Windows computer; the chat may run on another computer or a phone. |
+| **Compatible browser AI chats, including ChatGPT, Claude, Gemini and DeepSeek** | [Blender Bridge browser extension](https://chromewebstore.google.com/detail/blender-bridge/lgdjpajmggpkjcdogglbeipbkckdpoki), with universal Auto Setup and the app's pairing key. | The same computer as the browser extension. |
+
+Use MCP when your AI supports it. The browser extension uses universal Auto Setup to adapt to compatible AI chat interfaces, including chats without an MCP connection. Auto Setup finds usable interaction methods for the page's message editor; file/image transfer also requires compatible attachment controls. Run Auto Setup for the chat site and allow the extension access to it. It does not provide a remote route to a different Blender computer.
+
+A **plugin** packages the MCP connection and, in compatible hosts, a Blender panel. It is not another Blender engine. Hosts supporting MCP Apps can show the scene view, history, files and render progress inside the chat. The MCP tools also work in hosts without that panel. Marketplace availability and panel support are determined by the host.
+
+### Remote work and collaboration
+
+Remote work uses your account to select a receiving computer. The Blender Bridge app and Blender run there; a phone or laptop with the chat does not need its own Blender installation. The receiving computer must stay on and connected.
+
+Collaboration applies the same model to another person's computer. One participant **receives commands in Blender** on their computer; the other uses **their own AI** to work there. Either can initiate an invitation, choosing their role for that session. The other participant sees and accepts their role. Both accounts need confirmed email and active Blender Bridge access. Being contacts alone grants no control.
+
+A session joins the owner and one invited person. An invitation has a limited acceptance period; an accepted session continues until either person ends it, subject to account access and computer availability. Use the installed MCP's Remote mode, HTTPS MCP or a compatible plugin for collaboration; the browser extension remains local.
+
+[Remote work](https://blenderbridge.com/#documentation-blender-from-any-device) · [Collaboration](https://blenderbridge.com/#documentation-collaboration)
+
+<a id="architecture"></a>
+## Architecture and execution
 
 ```mermaid
-%%{init: {"theme":"base","themeVariables":{"fontFamily":"Arial, sans-serif","fontSize":"16px","lineColor":"#1589ff","textColor":"#ffffff","edgeLabelBackground":"#00030d"},"flowchart":{"curve":"linear","nodeSpacing":32,"rankSpacing":36},"htmlLabels":false}}%%
 flowchart TB
-    chat["AI web chats"] <--> extension["Browser extension"]
-    agent["AI agents / MCP clients"] <--> mcp["MCP server"]
-    extension <--> bridge["Desktop app<br/>HTTP Bridge"]
-    mcp <--> bridge
-    bridge <--> blender["Blender<br/>Blender Bridge add-on"]
-
-    classDef ai fill:#00030d,stroke:#1589ff,color:#ffffff
-    classDef core fill:#00030d,stroke:#1589ff,color:#ffffff,stroke-width:2px
-    classDef scene fill:#00030d,stroke:#ea7600,color:#ffffff,stroke-width:2px
-    class chat,agent,extension,mcp ai
-    class bridge core
-    class blender scene
-    linkStyle default stroke:#1589ff
+    agent["AI app / editor"] <-->|"stdio"| mcp["Installed Blender Bridge MCP"]
+    mcp <-->|"Local"| desktop["Blender Bridge app · Windows"]
+    mcp <-->|"Remote · selected computer"| relay["Blender Bridge server"]
+    chat["AI chat · computer or phone"] <-->|"HTTPS MCP + OAuth"| relay
+    relay <--> desktop
+    browser["Browser extension · same computer"] <-->|"local connection"| desktop
+    desktop <--> addon["Blender Bridge extension inside Blender"]
+    addon <--> scene["Blender Python API · editable scene"]
 ```
 
-Commands travel to Blender; execution results, scene data, and screenshots return through the same connection.
+| Component | Responsibility |
+|---|---|
+| **AI host and chosen model** | Interpret the task, select tools, write Blender Python, examine returned data/images and plan revisions. |
+| **Installed MCP process** | Expose Blender and application tools to desktop and IDE clients supporting MCP. In Local mode it reaches the local app; in Remote mode it routes to a selected own/shared computer. |
+| **Blender Bridge app** | Manage account access, the selected Blender installation, project workspace, Blender extension, connection state and command history. This is the common execution point on the receiving computer. |
+| **Blender extension** | Execute inside Blender, expose scene information and images, and support scene checkpoints and rendering operations. |
+| **Blender Bridge server** | Route remote connections and collaboration to the authorized computer, and provide temporary download links for requested files. Blender modeling and rendering still run on the receiving computer. |
+| **Browser extension** | Connect the supported AI web page to the app on the same computer. |
 
-### The Desktop Companion App
-The local companion app manages bridge lifecycle, loopback communication with Blender, active connection health, and one-click add-on installation:
+An online chat does not connect to its own device's `localhost` to reach your Blender computer. A remote request travels through the server to the selected app; local MCP and the browser extension connect to the local app. Tool results and requested images return along the chosen route.
 
-<div align="center">
-<br>
-<img src="assets/desktop-app.png" alt="Blender Bridge Desktop Companion App" width="860">
-<br>
-<sub>Real-time connection monitoring, one-click add-on management, and bridge activity history.</sub>
-</div>
+<a id="mcp-interface"></a>
+## MCP interface: inspect, execute, verify
 
----
+The connected server supplies the current tool names, schemas and descriptions through MCP. The groups below explain the interface; the current schemas come from `tools/list`, while visual panels depend on the host.
 
-## The Role of Your AI Model
+| Task | Main tools |
+|---|---|
+| Select and check the destination | `get_connection`, `set_connection`, `get_setup_status`, `check_connection`, `get_blender_info` |
+| Inspect the project and result | `get_scene_state`, `take_screenshot` |
+| Work in Blender | `execute_blender_code` |
+| Look up the API and workflows | `lookup_blender_api`, `search_blender_manual`, `get_blender_recipe` |
+| Find optional assets | `find_free_assets` |
+| Save, render and export | `save_blend_file`, `render_project_image`, `export_model` |
+| Use a reference | `set_reference_image`, `compare_reference_render` |
+| Retrieve output files | `list_project_files`, `get_project_file` |
+| Follow a long operation | `get_blender_operation_status`, `cancel_blender_operation` |
+| Recover a scene state | `scene_checkpoints`, `undo_last_action` |
+| Configure the receiving app | `get_app_state`, `find_blender_installations`, `select_blender`, `open_blender`, `ensure_blender_extension`, `set_project_workspace` |
+| Work with a collaborator | `list_friends`, `invite_collaborator`, `accept_collaboration`, `end_collaboration` |
 
-Blender Bridge provides the high-speed execution bridge and visual feedback loop, but the spatial complexity, procedural depth, and visual polish of the resulting 3D scene depend directly on the reasoning capabilities of the AI model you connect:
+### A scene-aware working loop
 
-- **Advanced Multimodal & Reasoning Models:** Excel at complex 3D mathematics, procedural shader graphs, physical lighting setups, multi-camera cinematography, and diagnosing visual defects through viewport screenshots.
-- **Compact & Local Models:** Ideal for rapid prototyping, primitive manipulation, basic asset placement, and straightforward Python tasks.
+The AI can inspect the existing scene before making changes, execute a named operation, request a viewport or camera image, then refine the result. Images are requested when useful; a screenshot, render or export is not required after every command.
 
-> [!NOTE]
-> Blender Bridge is model-agnostic: choose the AI model that fits your task and use its capabilities to inspect and refine your Blender scene.
+For example, these are MCP `tools/call` parameters for inspecting the scene:
 
----
+```json
+{
+  "name": "get_scene_state",
+  "arguments": { "full": false }
+}
+```
 
-## Universal Connectivity: Two Ways to Work
+An explicit request to keep a project can use the file tool:
 
-Blender Bridge is designed to be completely universal. It does not tie you to a single AI provider, chat interface, or development environment:
+```json
+{
+  "name": "save_blend_file",
+  "arguments": {
+    "filename": "scene.blend",
+    "operation_name": "Save the working scene"
+  }
+}
+```
 
-### 1. Universal Browser Extension
-*For interactive workflows in any Chromium browser.*
+For Python work, `execute_blender_code` accepts `code` and a short `operation_name` used in the human-readable history. File-producing code also uses structured project/output fields. The server's schemas and `get_llm_instruction` describe those contracts and available helpers.
 
-<div align="center">
-<br>
-<img src="assets/extension-menu.png" alt="Blender Bridge Extension In-Page Interactive Menu" width="760">
-<br>
-<sub>In-page control panel: execution modes, viewport capture toggles, scene operations, and activity history.</sub>
-<br><br>
-<img src="assets/extension-popup.png" alt="Blender Bridge Extension Quick Settings Popup" width="380">
-<br>
-<sub>Quick settings popup: global bridge toggle and display mode selection.</sub>
-<br>
-</div>
+A long operation may return a **running request ID** before it finishes. Poll that ID with `get_blender_operation_status` instead of submitting the work again. A running acknowledgement is not the completed output. Background renders support stopping; other operations can stop only where that operation supports cancellation.
 
-- **Connect Your Web AI Interface:** Use Auto Setup with ChatGPT, Claude, Google Gemini, DeepSeek, HuggingChat, local WebUIs, self-hosted LLM frontends, corporate chats, and others.
-- **Universal Auto Setup:** A dynamic site-mapping system. Because web interfaces vary, Auto Setup analyzes the structure of the selected chat page (input prompt field, send trigger, message container). Once configured, the extension uses that mapping to send commands and return results in the chat.
-- **Three UI Display Modes:** Choose how the extension integrates into your browser:
-  1. *Embedded In-Chat Icon:* Sits neatly within the chat's input or message toolbar.
-  2. *Floating Action Button:* A moveable button that toggles the primary control panel on demand.
-  3. *Side Panel Mode:* Runs in Chrome's dedicated browser side panel alongside your conversation.
-- **Controlled Execution Modes:**
-  - *Manual Mode (Default):* Whenever the AI produces Blender code, an interactive **Run** button appears. You inspect the code and execute it with a single click.
-  - *Auto Mode:* Can be toggled on to execute incoming Blender commands automatically for continuous hands-off generation.
-- **Visual Feedback & Scene Controls:** Configure viewport capture delivery (on-demand or automatic), run Scene Scans to inspect object hierarchies, and trigger single-click Undo.
-- **Multilingual Support:** The extension interface is fully localized in **15 languages**.
+### Knowledge and optional assets
 
-### 2. Universal MCP Server (Model Context Protocol)
-*For autonomous agents, coding assistants, and agent environments.*
+The AI can consult the Python API reference for the available Blender versions and search the Blender 5.2 manual. Optional recipes cover product shots, interiors, characters, ad clips and photo-reference work. Reading a reference or recipe does not change the scene or force a particular workflow.
 
-- **Broad Client Compatibility:** Operates over standard `stdio` with any tool supporting the open Model Context Protocol, including Cursor, Claude Code, Codex, Antigravity, Windsurf, VS Code (with Cline / Roo Code), and custom CLI agents.
-- **Zero Configuration Friction:** Pre-packaged with an isolated, bundled Node runtime. You do not need to install `npm`, configure system environment variables, or manage dependencies.
-- **Autonomous Multi-Step Iteration:** Agents can query scene hierarchies, generate geometry, request viewport renders, inspect visual quality, and refine the 3D scene across multiple autonomous steps with the execution controls of their MCP client.
-- **Specialized Blender Tools:** Work with your Blender scene through dedicated tools:
-  - Executing Python scripts in the active scene.
-  - Querying detailed scene state, object lists, materials, and modifier properties.
-  - Capturing viewport screenshots from active angles or specific cameras.
-  - Reverting actions cleanly via the native Blender undo history.
-  - Running diagnostic test scenes to verify system readiness.
-- **One-Click Agent Setup:** Open the Blender Bridge Desktop app, go to the **MCP** tab, and click **Copy instruction for agent**. Paste that instruction into your agent's chat, or follow it when configuring your MCP client — the app automatically supplies the exact, verified paths for your installation.
+`find_free_assets` searches CC0 textures from Poly Haven and ambientCG, plus models and HDRIs from Poly Haven. Search does not download or apply an asset. A selected asset can then be downloaded into Blender Bridge's local asset storage and used in the scene. Materials use the maps available for that asset; opacity or displacement is added when needed and present. The AI names the source. External assets are optional.
 
----
+<a id="files"></a>
+## Projects, rendering and exported files
 
-## Quick Start
+The **project workspace** is the default folder for requested scenes, renders and exports. Creating or editing a scene does not itself save a `.blend` file. `save_blend_file` saves a copy of the complete scene while preserving the open file and unsaved changes. Keep the source `.blend` when you want to return to objects, nodes or animation after exporting.
 
-### 1. Install Blender Bridge Desktop
-Download and install the companion application from [blenderbridge.com/#download](https://blenderbridge.com/#download).
+### Images, animation and background rendering
 
-### 2. Enable the Blender Add-on
-1. Open the Blender Bridge desktop application and sign in. You can activate a **7-day free trial**, with no card required.
-2. Click **Add add-on** and follow the setup prompts to install and connect the Blender add-on.
-3. Open Blender, click **Start** in the desktop app, and verify that **HTTP bridge** and **Blender server** both show **Online**.
+`render_project_image` produces PNG images, with dimensions up to 8192 × 8192. The AI can set render engines, lighting, transparency and compositing through Blender Python. For animation or a long render, Blender Bridge can save a scene copy and render it in a **separate Blender process**, report progress and stop that render. The main Blender remains responsive.
 
-### 3. Connect Your AI
+The background job renders the scene copy made **at launch time**. Later edits to the open scene belong to another version, not to the running render. Bake simulations into their file caches before rendering a background animation; scene checkpoints do not roll those files back. Request the finished image sequence or video after the operation completes.
 
-#### Option A: Browser Extension (Web Chats)
-1. Install the **[Blender Bridge Extension](https://chromewebstore.google.com/detail/blender-bridge/lgdjpajmggpkjcdogglbeipbkckdpoki)** from the Chrome Web Store.
-2. Open the extension and sign in. Copy the **Pairing key** from the desktop app’s settings into the extension’s **Settings → Pairing key**. Keep the desktop bridge running.
-3. Open your preferred AI chat, run **Auto Setup**, and choose an embedded button, floating button, or side panel.
-4. Use **LLM Instruction** in the extension menu to give your AI the Blender Bridge instructions.
-5. Describe your scene and click **Run** when the AI generates a Blender command.
+### Export presets
 
-#### Option B: MCP Server (Agents & Environments)
-1. In the Blender Bridge desktop application, open the **MCP** tab.
-2. Click **Copy instruction for agent**.
-3. Paste the instruction into your agent’s chat, or follow its steps in your MCP client’s configuration (e.g. Cursor, Claude Desktop, Windsurf).
-4. Prompt your agent to inspect or build scenes in Blender.
+| Destination | Output | Export behavior |
+|---|---|---|
+| **Web and Godot** | GLB | Model/material data in one file, with scene-unit scale accounted for. |
+| **Unity** | FBX | Y up, −Z forward; scene scale and embedded textures. |
+| **Unreal Engine** | FBX | Z up, −Y forward; scene scale and embedded textures. |
+| **AR** | USDZ | Meter-based scene; the preset requires unit scale 1. |
+| **3D printing** | STL | Coordinates in millimeters, accounting for scene-unit scale. STL has no unit label or materials; check dimensions and print preparation in the slicer. |
 
----
+The export tool leaves scene transforms unchanged, refuses an existing destination, and reports axes, units, file size and material warnings. Procedural materials may need texture baking for another application. Open the result in the intended engine, viewer or slicer to check it. Other Blender formats, such as OBJ, PLY, Alembic or USD, remain available through Python.
 
-## Full Blender Capability Surface
+### Reference images and delivery
 
-Blender Bridge executes directly against Blender's full official Python API (`bpy`). There are no artificial sandbox restrictions or locked features. The AI has access to the full scope of Blender's engine:
+A photo can come from a project file, a direct public image link, or a chat attachment when the host can pass files to tools. PNG/JPEG are supported. `set_reference_image` sets the camera reference; your AI builds and adjusts the scene. After rendering, `compare_reference_render` creates a side-by-side image with proportions preserved. Each input image can contain up to 8 megapixels; the comparison is not an automatic camera solver or neural mesh reconstruction.
 
-| Creative Domain | What the AI Can Control |
-| :--- | :--- |
-| **Geometry & Modeling** | Primitives, procedural mesh generation, Boolean operations, modifier stacks, subdivision surfaces, curves, sculpting automation, and complex Geometry Nodes node graphs. |
-| **Shading & Materials** | Principled BSDF networks, procedural noise and Voronoi textures, glass, subsurface scattering (SSS), emission, UV mapping, and material slot assignments. |
-| **Lighting & Environment** | Three-point studio lighting, Sun, Area, Spot, and Point lamps, HDRI world environments, color temperature, volumetric fog, and atmospheric scattering. |
-| **Cameras & Cinematography** | Sensor sizes, focal lengths, depth of field (DoF), autofocus targets, composition guides, object tracking, and multi-camera rigs. |
-| **Animation & Rigging** | Keyframing, graph editor curves, shape keys, armatures, constraints, path followers, driver expressions, and physics baking. |
-| **Physics & Simulations** | Rigid body dynamics, cloth simulations, fluid/smoke domains, soft bodies, collision boundaries, and force fields. |
-| **Rendering & Compositing** | Cycles and EEVEE-Next engine configurations, sample counts, denoising, render passes (AO, Mist, Cryptomatte), compositing trees, and automated file output. |
+Files remain on the Blender computer. Local file retrieval returns a disk path; server-connected chats can receive a temporary download link. That signed link is valid for 24 hours **from upload**, and anyone holding it can download without another sign-in. Ending a collaboration session does not revoke a link already issued. Link expiry and physical cleanup of the temporary server copy are separate steps.
 
----
+[Rendering](https://blenderbridge.com/#documentation-rendering) · [Exporting](https://blenderbridge.com/#documentation-export) · [3D printing](https://blenderbridge.com/#documentation-3d-printing)
 
-## Execution & Scene Undo
+<a id="history"></a>
+## Checkpoints and scene history
 
-- **Isolated Network Boundary:** The communication socket binds strictly to `127.0.0.1`. It does not listen on external network adapters and cannot be discovered or accessed by other devices on your local network.
-- **Cryptographic Execution Leases:** Code execution requires an active, short-lived authorization lease signed by the official auth gateway. Commands require the pairing key and a valid signed access grant.
-- **Native Scene Undo:** Undo the last supported scene operation through the extension or MCP. External Python effects, such as files written to disk, are not reverted.
-- **Zero Creative Telemetry:** We collect zero telemetry on your models, meshes, textures, prompts, or generated scenes. The extension contains no advertising or analytics SDK and never sells user data.
+AI work is recorded as named scene steps. Returning to a named step restores the scene **after that step**; `undo_last_action` returns to the state **before the latest AI change**. These are different operations.
 
----
+A checkpoint covers the whole Blender scene, including later manual edits that may be undone by a return. Manual edits do not become independent AI-history entries. An available **Undo return** restores the preceding scene state until further work invalidates that return. Important results should also be saved as `.blend` files: the available history is bounded by storage and retention.
 
-## System Requirements
+For an already saved project, returning to a checkpoint also writes the restored scene back to that original `.blend` file; Blender Bridge first keeps backups of the current scene and the existing disk file. Recovery does not undo other output files, exports, simulation caches or external effects. [Checkpoint guide](https://blenderbridge.com/#documentation-checkpoints)
 
-| Parameter | Requirement |
-| :--- | :--- |
-| **Operating System** | Windows 10 or Windows 11 (64-bit) |
-| **Blender Version** | Blender 4.0+, 4.2 LTS, 4.3+, and 5.x |
-| **Browser (Extension)** | Google Chrome, Microsoft Edge, Brave, Opera, or any modern Chromium browser |
-| **MCP Hosts (Agent)** | Cursor, Claude Code, Claude Desktop, Codex, Antigravity, Windsurf, VS Code, or any stdio MCP host |
-| **AI Access** | Your preferred AI model or subscription (OpenAI, Anthropic, Google, DeepSeek, or local LLMs) |
+<a id="setup"></a>
+## Install and connect
 
----
+1. Install [Blender 4.2 or later](https://www.blender.org/download/) and the [Windows installer](https://github.com/Blender-Bridge/blender-bridge/releases/latest/download/Blender_Bridge_Installer.exe).
+2. Sign in to Blender Bridge. To start the trial, choose **Try for free** and confirm your email; registration alone does not start it. An account with active access can continue immediately.
+3. Follow the app's setup: select Blender, choose a project folder and install the Blender Bridge extension in Blender.
+4. Open **Settings → Connection methods** and use one route below. Use the same Blender Bridge account for the app and its connection.
 
-## Pricing & Licensing
+**Installed MCP:** copy the setup instruction from the app to your agent, or use the generated configuration in the host's MCP settings. It contains the actual executable, entry point and paths for your installation. The runtime is included; no separate Node.js, Python, npm or uv installation is required. Use the host's own configuration format and reload it if needed. A generic `mcpServers` block is not the format of every client.
 
-Activate a one-time, **7-day free trial** with full access to the desktop companion app, the browser extension, and the MCP server. No credit card required.
+**HTTPS MCP:** add `https://mcp.blenderbridge.com/mcp` as a custom connection in the AI host's settings, complete OAuth and select the receiving computer. Pasting the URL into an ordinary chat message does not configure MCP. Custom connectors and administrator approval depend on the host/account/workspace.
 
-After the trial, Blender Bridge is available via flexible subscription plans:
-- **1 Month**
-- **3 Months**
-- **6 Months**
-- **12 Months**
+**Browser extension:** install from the [Chrome Web Store](https://chromewebstore.google.com/detail/blender-bridge/lgdjpajmggpkjcdogglbeipbkckdpoki), sign in and paste the app's pairing key into its settings. On the AI website run **Auto Setup**. Send **LLM Instruction** in each new conversation, then use **Run** for a command or **Auto** mode. The extension can appear in the chat, as a floating button or in the browser side panel.
 
-View current pricing and available options on [blenderbridge.com/#pricing](https://blenderbridge.com/#pricing).
+Before editing a project, ask the AI to identify the selected computer and Blender version, inspect the scene and show its viewport. This can use `get_connection`, `get_setup_status`, `get_blender_info`, `get_scene_state` and `take_screenshot`; no test object or project overwrite is necessary.
 
----
+[Installation](https://blenderbridge.com/#documentation-install) · [MCP setup](https://blenderbridge.com/#documentation-mcp-server) · [ChatGPT/Claude](https://blenderbridge.com/#documentation-plugin) · [Browser extension](https://blenderbridge.com/#documentation-browser-extension)
 
-## Automatic Updates
+<a id="compatibility"></a>
+## Compatibility, access and execution boundaries
 
-The Blender Bridge ecosystem is designed to stay synchronized:
-- **Desktop Application & MCP Server:** Checks for updates on launch via cryptographically signed releases and patches smoothly.
-- **Blender Add-on:** Updated directly through the desktop application.
-- **Browser Extension:** Updates automatically through the Chrome Web Store.
+| Requirement | Details |
+|---|---|
+| **Receiving computer** | Windows 10/11 x64, Blender 4.2+ and the Blender Bridge app. Desktop versions for macOS and Linux are planned — coming soon. |
+| **Remote HTTPS chat/client** | Any device running a compatible host. It can control an authorized Windows receiver without its own Blender installation. |
+| **Browser extension** | Chrome, Microsoft Edge or another compatible Chromium browser on the Blender computer. Universal Auto Setup connects compatible AI chat interfaces, using the browser extension APIs and the site's message/file controls. |
+| **AI** | Your own account or local model. Coding ability and image understanding affect the work; custom MCP and panel availability depend on the host. |
+| **Languages** | App interface and documentation in 15 languages. |
+| **Trial and subscription** | Seven days once, explicitly activated with confirmed email; no card or automatic paid conversion. Continued access: 1, 3, 6 or 12 months. [Current plans](https://blenderbridge.com/#pricing). |
 
----
+Blender Python runs with the Blender process's privileges. Account authorization and pairing protect the connection; they do not turn arbitrary Python into an operating-system sandbox. Use the approval controls of your AI host and consider the effects of code on the project and computer.
 
-## Troubleshooting & FAQ
+The Blender-side connection listens on loopback. Remote commands and necessary results travel through the Blender Bridge server; usage statistics exclude AI conversations, code, scenes, images and file names. See [security and privacy](https://blenderbridge.com/#documentation-security) and the [privacy policy](https://blenderbridge.com/privacy).
 
-<details>
-<summary><b>"Blender not connected" in the desktop app</b></summary>
+The app manages signed-release updates for itself, Blender Bridge MCP and the Blender extension. The browser extension updates through the Chrome Web Store. Subscription expiry does not delete saved projects; those files remain usable in Blender.
 
-1. Make sure Blender is actively running. Blender Bridge connects to an open scene, not a closed program.
-2. In Blender's 3D Viewport, press <kbd>N</kbd> to open the sidebar and navigate to the **Blender Bridge** tab. Confirm the server status is **Running** on `127.0.0.1:9000`.
-3. If the server is stopped, click **Start Server**.
-4. If port `9000` is in use by another program, change the port in the add-on preferences and update it in the desktop app settings.
-</details>
+<a id="troubleshooting"></a>
+## Troubleshooting
 
-<details>
-<summary><b>Extension panel does not appear on a chat page</b></summary>
+| What you observe | What to check |
+|---|---|
+| **No Blender tools in the AI host** | Register/reconnect MCP in host settings. For the browser extension, complete Auto Setup and send the LLM instruction in that conversation. |
+| **Tools appear, but Blender is unavailable** | Read the setup/connection result: account access, selected computer, app availability and Blender extension readiness are separate checks. |
+| **Installed MCP cannot start** | Recopy the instruction/configuration from the app so the executable and entry-point paths match the installation. |
+| **The wrong computer is selected** | Read `get_connection`, select a listed destination with `set_connection`, and confirm the route before another change. |
+| **A remote computer is offline** | Keep its app and Blender running and connected. A local browser extension cannot reach another machine. |
+| **A long operation is still running** | Poll its request ID; do not submit a duplicate. Use the stop operation only where supported. |
+| **An exported asset looks different elsewhere** | Check units, axes and the material warnings. Procedural shaders may need baking; inspect the file in the target application. |
 
-1. Reload the chat webpage once after installing the extension (browser security rules prevent extensions from injecting into tabs opened prior to installation).
-2. Ensure you have completed **Universal Auto Setup** on that chat site so the extension can recognize the page layout.
-3. Check that the Blender Bridge desktop application is running on your machine.
-</details>
+[Full troubleshooting guide](https://blenderbridge.com/#documentation-troubleshooting) · [Choose an AI](https://blenderbridge.com/#documentation-which-ai-to-use)
 
-<details>
-<summary><b>MCP Agent fails to start or locate the server</b></summary>
+## Releases, support and license
 
-1. Do not hand-type installation paths. Open the Blender Bridge desktop app, navigate to the **MCP** tab, and click **Copy instruction for agent**.
-2. Paste the exact copied configuration into your client's settings.
-3. Completely restart your MCP client (Cursor, Claude Desktop, VS Code) to reload the configuration.
-</details>
+[Releases](https://github.com/Blender-Bridge/blender-bridge/releases) provide the installer, release notes and updater assets. **New installations start with `Blender_Bridge_Installer.exe`.** `SHA256SUMS.txt` lists file checksums; the updater uses signed release metadata.
 
----
+For questions, bug reports or a suspected security issue: [support@blenderbridge.com](mailto:support@blenderbridge.com). Include product/Blender/AI-host versions, connection method and the relevant redacted error; exclude credentials and private project content.
 
-## Support
+Blender Bridge is a commercial product. See [LICENSE](LICENSE) and the [terms](https://blenderbridge.com/terms). This repository does not offer the application source code under an open-source license.
 
-If you have questions, feedback, or need technical assistance, contact our team directly at [support@blenderbridge.com](mailto:support@blenderbridge.com).
-
----
-
-## Trademark Disclaimer
-
-Blender Bridge is an independent commercial software product developed by Danil Anufriev. It is not affiliated with, endorsed by, or sponsored by the Blender Foundation. "Blender" is a registered trademark of the Blender Foundation in the EU, the USA, and other territories.
-
-<div align="center">
-<br>
-<sub>© 2026 Blender Bridge. All rights reserved.</sub>
-</div>
+Blender Bridge is an independent product, not affiliated with, endorsed by or sponsored by the Blender Foundation. Blender is a registered trademark of the Blender Foundation.
